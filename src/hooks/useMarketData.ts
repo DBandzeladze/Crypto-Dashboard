@@ -1,5 +1,19 @@
 import { useEffect, useState } from "react";
-import type { MarketCurrency } from "../types/market";
+import type {
+  BinanceTickerMessage,
+  MarketCurrency,
+  SupportedSymbol,
+} from "../types/market";
+
+import { isSupportedSymbol } from "../types/market";
+
+const currencyInfo: Record<SupportedSymbol, { name: string }> = {
+  BTCUSDT: { name: "Bitcoin" },
+  ETHUSDT: { name: "Ethereum" },
+  SOLUSDT: { name: "Solana" },
+  BNBUSDT: { name: "BNB" },
+  XRPUSDT: { name: "XRP" },
+};
 
 export function useMarketData() {
   const [marketData, setMarketData] = useState<MarketCurrency[]>([]);
@@ -20,42 +34,52 @@ export function useMarketData() {
     };
     ws.onmessage = (event) => {
       console.log("Message received:", event.data);
-      const data = JSON.parse(event.data);
+      const data: BinanceTickerMessage = JSON.parse(event.data);
       if (data && data.data) {
         console.log("Received data:", data);
         const { s: symbol, c: rawCurrentPrice } = data.data;
         const currentPrice = parseFloat(rawCurrentPrice);
         console.log(`Symbol: ${symbol}, Current Price: ${currentPrice}`);
-        setMarketData((prevData) => {
-          const existingCurrency = prevData.find(
-            (currency) => currency.symbol === symbol,
-          );
-          console.log("Existing currency:", existingCurrency);
-          if (existingCurrency) {
-            const previousPrice = existingCurrency.currentPrice;
-            const priceDirection =
-              currentPrice > previousPrice
-                ? "up"
-                : currentPrice < previousPrice
-                  ? "down"
-                  : "unchanged";
-            return prevData.map((currency) =>
-              currency.symbol === symbol
-                ? { ...currency, currentPrice, previousPrice, priceDirection }
-                : currency,
+        if (isSupportedSymbol(symbol)) {
+          const name = currencyInfo[symbol].name;
+          setMarketData((prevData) => {
+            const existingCurrency = prevData.find(
+              (currency) => currency.symbol === symbol,
             );
-          } else {
-            return [
-              ...prevData,
-              {
-                symbol,
-                currentPrice,
-                previousPrice: currentPrice,
-                priceDirection: "unchanged",
-              },
-            ];
-          }
-        });
+            console.log("Existing currency:", existingCurrency);
+            if (existingCurrency) {
+              const previousPrice = existingCurrency.currentPrice;
+              const priceDirection =
+                currentPrice > previousPrice
+                  ? "up"
+                  : currentPrice < previousPrice
+                    ? "down"
+                    : "unchanged";
+              return prevData.map((currency) =>
+                currency.symbol === symbol
+                  ? {
+                      ...currency,
+                      name,
+                      currentPrice,
+                      previousPrice,
+                      priceDirection,
+                    }
+                  : currency,
+              );
+            } else {
+              return [
+                ...prevData,
+                {
+                  symbol,
+                  name,
+                  currentPrice,
+                  previousPrice: currentPrice,
+                  priceDirection: "unchanged",
+                },
+              ];
+            }
+          });
+        }
       }
     };
 
