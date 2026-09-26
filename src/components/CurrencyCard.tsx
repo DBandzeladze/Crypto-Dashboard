@@ -12,7 +12,7 @@ export function CurrencyCard({ currency }: CurrencyCardProps) {
   const currencyIcon = `cryptocurrency:${symbol.slice(0, 3).toLowerCase()}`;
 
   return (
-    <div className="flex flex-col w-96 gap-3 rounded-xl border border-indigo-100 bg-white p-5 shadow-sm transition-shadow hover:shadow-md">
+    <div className="flex flex-col gap-3 rounded-xl border border-indigo-100 bg-white p-5 shadow-sm transition-shadow hover:shadow-md">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <span className="flex h-11 w-11 items-center justify-center rounded-lg bg-indigo-50 text-sm font-semibold text-indigo-600">

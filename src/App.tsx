@@ -1,10 +1,10 @@
 import "./index.css";
-import { TestCurrencyComponent } from "./components/TestCurrency";
+import CurrencyList from "./components/CurrencyList";
 
 function App() {
   return (
     <>
-      <TestCurrencyComponent />
+      <CurrencyList />
     </>
   );
 }

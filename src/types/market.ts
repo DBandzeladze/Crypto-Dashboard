@@ -31,3 +31,10 @@ export type SupportedSymbol = (typeof SUPPORTED_SYMBOLS)[number];
 export function isSupportedSymbol(symbol: string): symbol is SupportedSymbol {
   return SUPPORTED_SYMBOLS.includes(symbol as SupportedSymbol);
 }
+
+export type ConnectionStatus =
+  | "connecting"
+  | "connected"
+  | "reconnecting"
+  | "disconnected"
+  | "error";

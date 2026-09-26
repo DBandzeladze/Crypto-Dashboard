@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type {
   BinanceTickerMessage,
+  ConnectionStatus,
   MarketCurrency,
   SupportedSymbol,
 } from "../types/market";
@@ -17,22 +18,43 @@ const currencyInfo: Record<SupportedSymbol, { name: string }> = {
 
 export function useMarketData() {
   const [marketData, setMarketData] = useState<MarketCurrency[]>([]);
-  useEffect(() => {
-    const ws = new WebSocket(
+  const [connectionStatus, setConnectionStatus] =
+    useState<ConnectionStatus>("connecting");
+
+  const wsRef = useRef<WebSocket | null>(null);
+  const reconnectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const shouldReconnectRef = useRef(true);
+  function connect() {
+    wsRef.current = new WebSocket(
       "wss://fstream.binance.com/market/stream?streams=btcusdt@ticker/ethusdt@ticker/solusdt@ticker/bnbusdt@ticker/xrpusdt@ticker",
     );
-    ws.onopen = () => {
+    wsRef.current.onopen = () => {
       console.log("WebSocket connection established");
+      setConnectionStatus("connected");
     };
-    ws.onclose = (event) => {
+    wsRef.current.onclose = (event) => {
       console.log(
         `WebSocket connection closed: ${event.code} - ${event.reason}`,
       );
+      if (event.wasClean === false) {
+        console.log("Attempting to reconnect in 5 seconds...");
+        setConnectionStatus("reconnecting");
+        reconnectTimerRef.current = setTimeout(() => {
+          reconnectTimerRef.current = null;
+
+          if (shouldReconnectRef.current) {
+            connect();
+          }
+        }, 5000);
+      } else {
+        setConnectionStatus("disconnected");
+      }
     };
-    ws.onerror = (error) => {
+    wsRef.current.onerror = (error) => {
       console.error("WebSocket error:", error);
+      setConnectionStatus("error");
     };
-    ws.onmessage = (event) => {
+    wsRef.current.onmessage = (event) => {
       console.log("Message received:", event.data);
       const data: BinanceTickerMessage = JSON.parse(event.data);
       if (data && data.data) {
@@ -82,10 +104,23 @@ export function useMarketData() {
         }
       }
     };
+  }
+  useEffect(() => {
+    connect();
 
     return () => {
-      ws.close();
+      shouldReconnectRef.current = false;
+      if (wsRef.current) {
+        wsRef.current.close();
+      }
+      if (reconnectTimerRef.current) {
+        clearTimeout(reconnectTimerRef.current);
+        reconnectTimerRef.current = null;
+      }
     };
   }, []);
-  return marketData;
+  return {
+    marketData,
+    connectionStatus,
+  };
 }
