@@ -4,6 +4,7 @@ import { ConnectionStatusIndicator } from "./components/ConnectionStatus";
 import { SearchBar } from "./components/SearchBar";
 import { useState } from "react";
 import type { MarketCurrency, SortDirection, SortOption } from "./types/market";
+import { SortingMenu } from "./components/SortingMenu";
 
 function Dashboard() {
   const { marketData, connectionStatus } = useMarketData();
@@ -52,6 +53,13 @@ function Dashboard() {
     }
     return sortedData;
   }
+  function onSortChange(selection: {
+    option: SortOption;
+    direction: SortDirection;
+  }) {
+    setSortOption(selection.option);
+    setSortDirection(selection.direction);
+  }
   return (
     <div className="min-h-screen bg-gray-100">
       <header className="flex flex-row-reverse">
@@ -59,8 +67,11 @@ function Dashboard() {
           <ConnectionStatusIndicator connectionStatus={connectionStatus} />
         </span>
       </header>
-      <div className="ml-4">
+      <div className="ml-4 flex flex-row">
         <SearchBar searchTerm={searchTerm} onSearchChange={setSearchTerm} />
+        <div className="ml-2">
+          <SortingMenu onSortChange={onSortChange} />
+        </div>
       </div>
       <CurrencyList
         marketData={sortMarketData(
