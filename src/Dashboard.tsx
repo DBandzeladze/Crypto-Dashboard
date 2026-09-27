@@ -2,7 +2,7 @@ import CurrencyList from "./components/CurrencyList";
 import { useMarketData } from "./hooks/useMarketData";
 import { ConnectionStatusIndicator } from "./components/ConnectionStatus";
 import { SearchBar } from "./components/SearchBar";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { MarketCurrency, SortDirection, SortOption } from "./types/market";
 import { SortingMenu } from "./components/SortingMenu";
 
@@ -11,6 +11,20 @@ function Dashboard() {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortOption, setSortOption] = useState<SortOption>("priceChange");
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
+  const [favoriteMap, setFavoriteMap] = useState<Record<string, boolean>>(
+    () => {
+      const savedFavorites = localStorage.getItem("favorites");
+      if (savedFavorites) {
+        try {
+          return JSON.parse(savedFavorites);
+        } catch {
+          return {};
+        }
+      } else {
+        return {};
+      }
+    },
+  );
   function filterMarketData() {
     const lowerTerm = searchTerm.toLowerCase();
     const filteredMarketData = marketData.filter(
@@ -60,6 +74,15 @@ function Dashboard() {
     setSortOption(selection.option);
     setSortDirection(selection.direction);
   }
+  function onFavoriteChange(symbol: string) {
+    setFavoriteMap((prev) => ({
+      ...prev,
+      [symbol]: !prev[symbol],
+    }));
+  }
+  useEffect(() => {
+    localStorage.setItem("favorites", JSON.stringify(favoriteMap));
+  }, [favoriteMap]);
   return (
     <div className="min-h-screen bg-gray-100">
       <header className="flex flex-row-reverse">
@@ -79,6 +102,8 @@ function Dashboard() {
           sortOption,
           sortDirection,
         )}
+        onFavoriteChange={onFavoriteChange}
+        favoriteMap={favoriteMap}
       />
     </div>
   );
