@@ -1,4 +1,3 @@
-import { useMarketData } from "../hooks/useMarketData";
 import type { MarketCurrency } from "../types/market";
 import { CurrencyCard } from "./CurrencyCard";
 

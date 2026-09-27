@@ -36,6 +36,8 @@ export function useMarketData() {
       console.log(
         `WebSocket connection closed: ${event.code} - ${event.reason}`,
       );
+      console.log("wasClean:", event.wasClean);
+      console.log("shouldReconnect:", shouldReconnectRef.current);
       if (shouldReconnectRef.current && event.wasClean === false) {
         console.log("Attempting to reconnect in 5 seconds...");
         setConnectionStatus("reconnecting");
@@ -55,20 +57,20 @@ export function useMarketData() {
       setConnectionStatus("error");
     };
     wsRef.current.onmessage = (event) => {
-      console.log("Message received:", event.data);
+      // console.log("Message received:", event.data);
       const data: BinanceTickerMessage = JSON.parse(event.data);
       if (data && data.data) {
-        console.log("Received data:", data);
+        // console.log("Received data:", data);
         const { s: symbol, c: rawCurrentPrice } = data.data;
         const currentPrice = parseFloat(rawCurrentPrice);
-        console.log(`Symbol: ${symbol}, Current Price: ${currentPrice}`);
+        // console.log(`Symbol: ${symbol}, Current Price: ${currentPrice}`);
         if (isSupportedSymbol(symbol)) {
           const name = currencyInfo[symbol].name;
           setMarketData((prevData) => {
             const existingCurrency = prevData.find(
               (currency) => currency.symbol === symbol,
             );
-            console.log("Existing currency:", existingCurrency);
+            // console.log("Existing currency:", existingCurrency);
             if (existingCurrency) {
               const previousPrice = existingCurrency.currentPrice;
               const priceDirection =
