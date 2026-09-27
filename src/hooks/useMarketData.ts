@@ -36,7 +36,7 @@ export function useMarketData() {
       console.log(
         `WebSocket connection closed: ${event.code} - ${event.reason}`,
       );
-      if (event.wasClean === false) {
+      if (shouldReconnectRef.current && event.wasClean === false) {
         console.log("Attempting to reconnect in 5 seconds...");
         setConnectionStatus("reconnecting");
         reconnectTimerRef.current = setTimeout(() => {

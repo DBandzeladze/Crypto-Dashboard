@@ -1,10 +1,10 @@
 import "./index.css";
-import CurrencyList from "./components/CurrencyList";
+import Dashboard from "./Dashboard";
 
 function App() {
   return (
     <>
-      <CurrencyList />
+      <Dashboard />
     </>
   );
 }

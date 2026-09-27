@@ -1,8 +1,12 @@
 import { useMarketData } from "../hooks/useMarketData";
+import type { MarketCurrency } from "../types/market";
 import { CurrencyCard } from "./CurrencyCard";
 
-export function CurrencyList() {
-  const { marketData, connectionStatus } = useMarketData();
+type CurrencyListProps = {
+  marketData: MarketCurrency[];
+};
+
+export function CurrencyList({ marketData }: CurrencyListProps) {
   return (
     <div className="grid grid-cols-1 gap-4 p-4 sm:grid-cols-2 lg:grid-cols-3">
       {marketData.map((currency) => (
