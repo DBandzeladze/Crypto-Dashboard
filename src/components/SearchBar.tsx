@@ -1,5 +1,5 @@
 import { Icon } from "@iconify/react";
-import { useState, type ChangeEvent } from "react";
+import { type ChangeEvent } from "react";
 
 type SearchBarProps = {
   searchTerm: string;

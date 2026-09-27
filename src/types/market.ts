@@ -38,3 +38,6 @@ export type ConnectionStatus =
   | "reconnecting"
   | "disconnected"
   | "error";
+
+export type SortOption = "name" | "currentPrice" | "priceChange";
+export type SortDirection = "asc" | "desc";
