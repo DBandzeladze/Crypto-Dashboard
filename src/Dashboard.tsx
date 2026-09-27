@@ -7,6 +7,15 @@ import { useState } from "react";
 function Dashboard() {
   const { marketData, connectionStatus } = useMarketData();
   const [searchTerm, setSearchTerm] = useState("");
+  function filterMarketData() {
+    const lowerTerm = searchTerm.toLowerCase();
+    const filteredMarketData = marketData.filter(
+      (currency) =>
+        currency.name.toLowerCase().includes(lowerTerm) ||
+        currency.symbol.slice(0, 3).toLowerCase().includes(lowerTerm),
+    );
+    return filteredMarketData;
+  }
   return (
     <div className="min-h-screen bg-gray-100">
       <header className="flex flex-row-reverse">
@@ -17,7 +26,7 @@ function Dashboard() {
       <div className="ml-4">
         <SearchBar searchTerm={searchTerm} onSearchChange={setSearchTerm} />
       </div>
-      <CurrencyList marketData={marketData} />
+      <CurrencyList marketData={filterMarketData()} />
     </div>
   );
 }
