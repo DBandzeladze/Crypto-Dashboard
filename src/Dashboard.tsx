@@ -3,14 +3,23 @@ import { useMarketData } from "./hooks/useMarketData";
 import { ConnectionStatusIndicator } from "./components/ConnectionStatus";
 import { SearchBar } from "./components/SearchBar";
 import { useEffect, useState } from "react";
-import type { MarketCurrency, SortDirection, SortOption } from "./types/market";
+import type {
+  ActiveView,
+  MarketCurrency,
+  SortDirection,
+  SortOption,
+} from "./types/market";
 import { SortingMenu } from "./components/SortingMenu";
+import { MarketViewToggle } from "./components/MarketViewToggle";
+import { HiddenCurrenciesToggle } from "./components/HiddenCurrenciesToggle";
 
 function Dashboard() {
   const { marketData, connectionStatus } = useMarketData();
   const [searchTerm, setSearchTerm] = useState("");
-  const [sortOption, setSortOption] = useState<SortOption>("priceChange");
-  const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
+  const [sortOption, setSortOption] = useState<SortOption>("name");
+  const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
+  const [activeView, setActiveView] = useState<ActiveView>("all");
+  const [showHidden, setShowHidden] = useState(false);
   const [favoriteMap, setFavoriteMap] = useState<Record<string, boolean>>(
     () => {
       const savedFavorites = localStorage.getItem("favorites");
@@ -25,7 +34,39 @@ function Dashboard() {
       }
     },
   );
-  function filterMarketData() {
+  const [hiddenMap, setHiddenMap] = useState<Record<string, boolean>>(() => {
+    const savedHidden = localStorage.getItem("hidden");
+    if (savedHidden) {
+      try {
+        return JSON.parse(savedHidden);
+      } catch {
+        return {};
+      }
+    } else {
+      return {};
+    }
+  });
+  function selectByActiveView(data: MarketCurrency[], activeView: ActiveView) {
+    if (activeView === "all") {
+      return data;
+    }
+    const selectedMarketData = [...data];
+    return selectedMarketData.filter(
+      (Currency) => favoriteMap[Currency.symbol] === true,
+    );
+  }
+  function separateHiddenMarketData(data: MarketCurrency[]) {
+    const visibleMarketData = [...data].filter(
+      (Currency) =>
+        hiddenMap[Currency.symbol] === undefined ||
+        hiddenMap[Currency.symbol] === false,
+    );
+    const hiddenMarketData = [...data].filter(
+      (Currency) => hiddenMap[Currency.symbol] === true,
+    );
+    return { visibleMarketData, hiddenMarketData };
+  }
+  function filterMarketData(marketData: MarketCurrency[]) {
     const lowerTerm = searchTerm.toLowerCase();
     const filteredMarketData = marketData.filter(
       (currency) =>
@@ -67,6 +108,22 @@ function Dashboard() {
     }
     return sortedData;
   }
+
+  function processMarketData() {
+    const { visibleMarketData, hiddenMarketData } =
+      separateHiddenMarketData(marketData);
+    const selectedMarketData = selectByActiveView(
+      visibleMarketData,
+      activeView,
+    );
+    const filteredMarketData = filterMarketData(selectedMarketData);
+    const sortedMarketData = sortMarketData(
+      filteredMarketData,
+      sortOption,
+      sortDirection,
+    );
+    return { sortedMarketData, hiddenMarketData };
+  }
   function onSortChange(selection: {
     option: SortOption;
     direction: SortDirection;
@@ -80,9 +137,20 @@ function Dashboard() {
       [symbol]: !prev[symbol],
     }));
   }
+  function onHiddenChange(symbol: string) {
+    setHiddenMap((prev) => ({
+      ...prev,
+      [symbol]: !prev[symbol],
+    }));
+  }
   useEffect(() => {
     localStorage.setItem("favorites", JSON.stringify(favoriteMap));
   }, [favoriteMap]);
+  useEffect(() => {
+    localStorage.setItem("hidden", JSON.stringify(hiddenMap));
+  }, [hiddenMap]);
+
+  const { sortedMarketData, hiddenMarketData } = processMarketData();
   return (
     <div className="min-h-screen bg-gray-100">
       <header className="flex flex-row-reverse">
@@ -90,21 +158,45 @@ function Dashboard() {
           <ConnectionStatusIndicator connectionStatus={connectionStatus} />
         </span>
       </header>
-      <div className="ml-4 flex flex-row">
+      <div className="ml-4 flex flex-row gap-2">
+        <MarketViewToggle
+          onMarketViewChange={setActiveView}
+          activeView={activeView}
+        />
         <SearchBar searchTerm={searchTerm} onSearchChange={setSearchTerm} />
-        <div className="ml-2">
+        <div className="">
           <SortingMenu onSortChange={onSortChange} />
         </div>
       </div>
       <CurrencyList
-        marketData={sortMarketData(
-          filterMarketData(),
-          sortOption,
-          sortDirection,
-        )}
+        marketData={sortedMarketData}
         onFavoriteChange={onFavoriteChange}
         favoriteMap={favoriteMap}
+        onHiddenChange={onHiddenChange}
+        hiddenMap={hiddenMap}
       />
+      {hiddenMarketData.length ? (
+        <div className="ml-4">
+          <HiddenCurrenciesToggle
+            isOpen={showHidden}
+            onOpenchange={setShowHidden}
+            HiddenCount={hiddenMarketData.length}
+          />
+        </div>
+      ) : (
+        <></>
+      )}
+      {showHidden ? (
+        <CurrencyList
+          marketData={hiddenMarketData}
+          onFavoriteChange={onFavoriteChange}
+          favoriteMap={favoriteMap}
+          onHiddenChange={onHiddenChange}
+          hiddenMap={hiddenMap}
+        />
+      ) : (
+        <></>
+      )}
     </div>
   );
 }

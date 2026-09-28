@@ -1,4 +1,3 @@
-import { useState } from "react";
 import type { MarketCurrency } from "../types/market";
 import { Icon } from "@iconify/react";
 
@@ -6,12 +5,16 @@ type CurrencyCardProps = {
   currency: MarketCurrency;
   isFavorite: boolean;
   onFavoriteChange: (symbol: string) => void;
+  isHidden: boolean;
+  onHiddenChange: (symbol: string) => void;
 };
 
 export function CurrencyCard({
   currency,
   isFavorite,
   onFavoriteChange,
+  isHidden,
+  onHiddenChange,
 }: CurrencyCardProps) {
   const { symbol, name, currentPrice, priceDirection } = currency;
   const isUp = priceDirection === "up";
@@ -19,6 +22,9 @@ export function CurrencyCard({
   const currencyIcon = `cryptocurrency:${symbol.slice(0, 3).toLowerCase()}`;
   function handleFavoriteChange() {
     onFavoriteChange(symbol);
+  }
+  function handleHiddenChange() {
+    onHiddenChange(symbol);
   }
 
   return (
@@ -36,7 +42,7 @@ export function CurrencyCard({
           </div>
         </div>
 
-        <span>
+        <span className="relative group">
           <button
             onClick={handleFavoriteChange}
             className="cursor-pointer flex h-11 w-11 items-center justify-center rounded-full text-indigo-400"
@@ -46,6 +52,22 @@ export function CurrencyCard({
               className="size-6"
             />
           </button>
+          <div className="absolute right-full top-1/2 -translate-y-1/2 mr-1 hidden group-hover:block px-2 py-1 bg-gray-800 text-white text-xs rounded shadow-lg whitespace-nowrap">
+            {isFavorite ? "Remove from favorites" : "Mark as favorite"}
+            <div className="absolute left-full top-1/2 -translate-y-1/2 border-4 border-transparent border-l-gray-800"></div>
+          </div>
+        </span>
+        <span className="relative group">
+          <button
+            onClick={handleHiddenChange}
+            className="cursor-pointer flex h-11 w-11 items-center justify-center rounded-full text-indigo-400 group"
+          >
+            <Icon icon={isHidden ? "ep:view" : "ep:hide"} className="size-6" />
+          </button>
+          <div className="absolute right-full top-1/2 -translate-y-1/2 mr-1 hidden group-hover:block px-2 py-1 bg-gray-800 text-white text-xs rounded shadow-lg whitespace-nowrap">
+            {isHidden ? "Show currnecy" : "Hide currency"}
+            <div className="absolute left-full top-1/2 -translate-y-1/2 border-4 border-transparent border-l-gray-800"></div>
+          </div>
         </span>
       </div>
 

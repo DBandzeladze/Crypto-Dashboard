@@ -35,8 +35,6 @@ export function ConnectionStatusIndicator({
     },
   }[connectionStatus];
 
-  console.log(connectionStatus);
-
   return (
     <div className={`flex items-center gap-2 text-sm ${config.text}`}>
       <span

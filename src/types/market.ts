@@ -41,3 +41,4 @@ export type ConnectionStatus =
 
 export type SortOption = "name" | "currentPrice" | "priceChange";
 export type SortDirection = "asc" | "desc";
+export type ActiveView = "all" | "favorites";
