@@ -4,6 +4,7 @@ import type {
   ConnectionStatus,
   MarketCurrency,
   SupportedSymbol,
+  PriceAlert,
 } from "../types/market";
 
 import { isSupportedSymbol } from "../types/market";
@@ -20,10 +21,51 @@ export function useMarketData() {
   const [marketData, setMarketData] = useState<MarketCurrency[]>([]);
   const [connectionStatus, setConnectionStatus] =
     useState<ConnectionStatus>("connecting");
-
+  const [priceAlert, setPriceAlert] = useState<PriceAlert>();
+  const [threshold, setThreshold] = useState(2);
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const shouldReconnectRef = useRef(true);
+  const initialPricesRef = useRef<Record<string, number>>({});
+  const thresholdFlagsRef = useRef<
+    Record<string, { upper: boolean; lower: boolean }>
+  >({});
+  function handlePriceAlert(
+    symbol: string,
+    name: string,
+    initialPrice: number,
+    currentPrice: number,
+  ) {
+    const { upper, lower } = thresholdFlagsRef.current[symbol];
+    const percentageChange =
+      ((currentPrice - initialPrice) / initialPrice) * 100;
+    if (Math.abs(percentageChange) < threshold) {
+      thresholdFlagsRef.current[symbol] = { upper: false, lower: false };
+    } else {
+      if (percentageChange >= threshold && upper === false) {
+        thresholdFlagsRef.current[symbol].upper = true;
+        setPriceAlert({
+          symbol,
+          name,
+          initialPrice,
+          currentPrice,
+          percentageChange,
+          direction: "up",
+        });
+      }
+      if (percentageChange <= -threshold && lower === false) {
+        thresholdFlagsRef.current[symbol].lower = true;
+        setPriceAlert({
+          symbol,
+          name,
+          initialPrice,
+          currentPrice,
+          percentageChange,
+          direction: "down",
+        });
+      }
+    }
+  }
   function connect() {
     wsRef.current = new WebSocket(
       "wss://fstream.binance.com/market/stream?streams=btcusdt@ticker/ethusdt@ticker/solusdt@ticker/bnbusdt@ticker/xrpusdt@ticker",
@@ -66,6 +108,17 @@ export function useMarketData() {
         // console.log(`Symbol: ${symbol}, Current Price: ${currentPrice}`);
         if (isSupportedSymbol(symbol)) {
           const name = currencyInfo[symbol].name;
+          if (initialPricesRef.current[symbol] === undefined) {
+            initialPricesRef.current[symbol] = currentPrice;
+            thresholdFlagsRef.current[symbol] = { upper: false, lower: false };
+          } else {
+            handlePriceAlert(
+              symbol,
+              name,
+              initialPricesRef.current[symbol],
+              currentPrice,
+            );
+          }
           setMarketData((prevData) => {
             const existingCurrency = prevData.find(
               (currency) => currency.symbol === symbol,
@@ -124,5 +177,6 @@ export function useMarketData() {
   return {
     marketData,
     connectionStatus,
+    priceAlert,
   };
 }

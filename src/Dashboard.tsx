@@ -12,9 +12,11 @@ import type {
 import { SortingMenu } from "./components/SortingMenu";
 import { MarketViewToggle } from "./components/MarketViewToggle";
 import { HiddenCurrenciesToggle } from "./components/HiddenCurrenciesToggle";
+import { toast } from "@/components/ui/toast";
 
 function Dashboard() {
-  const { marketData, connectionStatus } = useMarketData();
+  const { marketData, connectionStatus, priceAlert } = useMarketData();
+  console.log(priceAlert);
   const [searchTerm, setSearchTerm] = useState("");
   const [sortOption, setSortOption] = useState<SortOption>("name");
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
@@ -151,6 +153,59 @@ function Dashboard() {
   }, [hiddenMap]);
 
   const { sortedMarketData, hiddenMarketData } = processMarketData();
+
+  useEffect(() => {
+    if (priceAlert === undefined) return;
+
+    const isUp = priceAlert.direction === "up";
+    const arrow = isUp ? "↑" : "↓";
+    const sign = isUp ? "+" : "";
+    const pctText = `${sign}${priceAlert.percentageChange.toFixed(2)}%`;
+    const pair = `${priceAlert.symbol.slice(0, -4)}/USDT`;
+
+    const id = toast.add({
+      title: `${priceAlert.name} significant Price Change Alert`,
+      type: "info",
+      description: (
+        <div>
+          <div className="flex flex-row justify-between">
+            <span>
+              {pair} {arrow}
+            </span>
+            <span>{pctText}</span>
+          </div>
+
+          <div className="flex flex-row justify-between">
+            <span>Initial price</span>
+            <span>
+              $
+              {priceAlert.initialPrice.toLocaleString("en-US", {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 6,
+              })}
+            </span>
+          </div>
+
+          <div className="flex flex-row justify-between">
+            <span>Current price</span>
+            <span>
+              $
+              {priceAlert.currentPrice.toLocaleString("en-US", {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 6,
+              })}
+            </span>
+          </div>
+          <div>Since you opened the page</div>
+        </div>
+      ),
+      actionProps: {
+        onClick() {
+          toast.close(id);
+        },
+      },
+    });
+  }, [priceAlert]);
   return (
     <div className="min-h-screen bg-gray-100">
       <header className="flex flex-row-reverse">
