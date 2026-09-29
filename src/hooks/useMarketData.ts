@@ -67,9 +67,6 @@ export function useMarketData() {
     }
   }
   function connect() {
-    if (!shouldReconnectRef.current) {
-      return;
-    }
     wsRef.current = new WebSocket(
       "wss://fstream.binance.com/market/stream?streams=btcusdt@ticker/ethusdt@ticker/solusdt@ticker/bnbusdt@ticker/xrpusdt@ticker",
     );
