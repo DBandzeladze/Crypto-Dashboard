@@ -28,7 +28,13 @@ export function CurrencyExchange({ marketData }: CurrencyExchangeProps) {
     return currencyList;
   }
   function handleCurrencyEnter(event: ChangeEvent<HTMLInputElement>) {
-    setEnteredAmount(Number(event.target.value));
+    const value = Number(event.target.value);
+
+    if (value < 0 || Number.isNaN(value)) {
+      return;
+    }
+
+    setEnteredAmount(value);
   }
   function swapCurrencies() {
     const tempCurrency = sourceCurrency;
@@ -91,9 +97,7 @@ export function CurrencyExchange({ marketData }: CurrencyExchangeProps) {
         />
       </div>
       <div className="">
-        <label htmlFor="Converted" className="ml-2 text-sm font-medium">
-          Converted amount
-        </label>
+        <p className="ml-2 text-sm font-medium">Converted amount</p>
         <div className="w-full rounded-md border border-indigo-200 bg-gray-50 px-3 py-2 text-sm">
           {sourceCurrency === "" || targetCurrency === ""
             ? "-"

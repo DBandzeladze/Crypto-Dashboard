@@ -43,7 +43,7 @@ export function useMarketData() {
       thresholdFlagsRef.current[symbol] = { upper: false, lower: false };
     } else {
       if (percentageChange >= threshold && upper === false) {
-        thresholdFlagsRef.current[symbol].upper = true;
+        thresholdFlagsRef.current[symbol] = { upper: true, lower: false };
         setPriceAlert({
           symbol,
           name,
@@ -54,7 +54,7 @@ export function useMarketData() {
         });
       }
       if (percentageChange <= -threshold && lower === false) {
-        thresholdFlagsRef.current[symbol].lower = true;
+        thresholdFlagsRef.current[symbol] = { upper: false, lower: true };
         setPriceAlert({
           symbol,
           name,
@@ -67,6 +67,9 @@ export function useMarketData() {
     }
   }
   function connect() {
+    if (!shouldReconnectRef.current) {
+      return;
+    }
     wsRef.current = new WebSocket(
       "wss://fstream.binance.com/market/stream?streams=btcusdt@ticker/ethusdt@ticker/solusdt@ticker/bnbusdt@ticker/xrpusdt@ticker",
     );
@@ -99,60 +102,68 @@ export function useMarketData() {
       setConnectionStatus("error");
     };
     wsRef.current.onmessage = (event) => {
-      const data: BinanceTickerMessage = JSON.parse(event.data);
-      if (data && data.data) {
-        const { s: symbol, c: rawCurrentPrice } = data.data;
-        const currentPrice = parseFloat(rawCurrentPrice);
-        if (isSupportedSymbol(symbol)) {
-          const name = currencyInfo[symbol].name;
-          if (initialPricesRef.current[symbol] === undefined) {
-            initialPricesRef.current[symbol] = currentPrice;
-            thresholdFlagsRef.current[symbol] = { upper: false, lower: false };
-          } else {
-            handlePriceAlert(
-              symbol,
-              name,
-              initialPricesRef.current[symbol],
-              currentPrice,
-            );
-          }
-          setMarketData((prevData) => {
-            const existingCurrency = prevData.find(
-              (currency) => currency.symbol === symbol,
-            );
-            if (existingCurrency) {
-              const previousPrice = existingCurrency.currentPrice;
-              const priceDirection =
-                currentPrice > previousPrice
-                  ? "up"
-                  : currentPrice < previousPrice
-                    ? "down"
-                    : "unchanged";
-              return prevData.map((currency) =>
-                currency.symbol === symbol
-                  ? {
-                      ...currency,
-                      name,
-                      currentPrice,
-                      previousPrice,
-                      priceDirection,
-                    }
-                  : currency,
-              );
+      try {
+        const data: BinanceTickerMessage = JSON.parse(event.data);
+        if (data && data.data) {
+          const { s: symbol, c: rawCurrentPrice } = data.data;
+          const currentPrice = parseFloat(rawCurrentPrice);
+          if (isSupportedSymbol(symbol)) {
+            const name = currencyInfo[symbol].name;
+            if (initialPricesRef.current[symbol] === undefined) {
+              initialPricesRef.current[symbol] = currentPrice;
+              thresholdFlagsRef.current[symbol] = {
+                upper: false,
+                lower: false,
+              };
             } else {
-              return [
-                ...prevData,
-                {
-                  symbol,
-                  name,
-                  currentPrice,
-                  previousPrice: currentPrice,
-                  priceDirection: "unchanged",
-                },
-              ];
+              handlePriceAlert(
+                symbol,
+                name,
+                initialPricesRef.current[symbol],
+                currentPrice,
+              );
             }
-          });
+            setMarketData((prevData) => {
+              const existingCurrency = prevData.find(
+                (currency) => currency.symbol === symbol,
+              );
+              if (existingCurrency) {
+                const previousPrice = existingCurrency.currentPrice;
+                const priceDirection =
+                  currentPrice > previousPrice
+                    ? "up"
+                    : currentPrice < previousPrice
+                      ? "down"
+                      : "unchanged";
+                return prevData.map((currency) =>
+                  currency.symbol === symbol
+                    ? {
+                        ...currency,
+                        name,
+                        currentPrice,
+                        previousPrice,
+                        priceDirection,
+                      }
+                    : currency,
+                );
+              } else {
+                return [
+                  ...prevData,
+                  {
+                    symbol,
+                    name,
+                    currentPrice,
+                    previousPrice: currentPrice,
+                    priceDirection: "unchanged",
+                  },
+                ];
+              }
+            });
+          }
         }
+      } catch (error) {
+        console.error("Failed to parse WebSocket message:", error);
+        setConnectionStatus("error");
       }
     };
   }

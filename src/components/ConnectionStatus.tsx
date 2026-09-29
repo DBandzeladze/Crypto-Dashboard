@@ -13,7 +13,7 @@ export function ConnectionStatusIndicator({
       color: "bg-yellow-500",
       borderColor: "border-yellow-200",
       text: "text-yellow-700",
-      background: "bg-green-50",
+      background: "bg-yellow-50",
     },
     connected: {
       label: "Connected",
