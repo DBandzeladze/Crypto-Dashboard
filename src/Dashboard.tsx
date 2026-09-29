@@ -1,4 +1,4 @@
-import CurrencyList from "./components/CurrencyList";
+import { CurrencyList } from "./components/CurrencyList";
 import { useMarketData } from "./hooks/useMarketData";
 import { ConnectionStatusIndicator } from "./components/ConnectionStatus";
 import { SearchBar } from "./components/SearchBar";
@@ -50,6 +50,8 @@ function Dashboard() {
       return {};
     }
   });
+  const { sortedMarketData, selectedHiddenData } = processMarketData();
+
   function selectByActiveView(data: MarketCurrency[], activeView: ActiveView) {
     if (activeView === "all") {
       return data;
@@ -155,8 +157,6 @@ function Dashboard() {
     localStorage.setItem("hidden", JSON.stringify(hiddenMap));
   }, [hiddenMap]);
 
-  const { sortedMarketData, selectedHiddenData } = processMarketData();
-
   useEffect(() => {
     if (priceAlert === undefined) return;
 
@@ -232,7 +232,7 @@ function Dashboard() {
           <ErrorScreen />
         ) : (
           <>
-            <section> 
+            <section>
               <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center">
                 <MarketViewToggle
                   onMarketViewChange={setActiveView}

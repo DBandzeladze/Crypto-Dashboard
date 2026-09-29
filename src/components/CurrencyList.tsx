@@ -32,4 +32,3 @@ export function CurrencyList({
   );
 }
 
-export default CurrencyList;
