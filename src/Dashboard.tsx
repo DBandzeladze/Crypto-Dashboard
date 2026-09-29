@@ -16,6 +16,7 @@ import { toast } from "@/components/ui/toast";
 import { CurrencyExchange } from "./components/CurrencyExchange";
 import { LoadingScreen } from "./components/LoadingScreen";
 import { ErrorScreen } from "./components/ErrorScreen";
+import { DisconnectedScreen } from "./components/DisconnectedScreen";
 
 function Dashboard() {
   const { marketData, connectionStatus, priceAlert } = useMarketData();
@@ -230,6 +231,8 @@ function Dashboard() {
           <LoadingScreen />
         ) : connectionStatus === "error" && marketData.length === 0 ? (
           <ErrorScreen />
+        ) : connectionStatus === "disconnected" && marketData.length === 0 ? (
+          <DisconnectedScreen />
         ) : (
           <>
             <section>

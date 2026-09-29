@@ -80,6 +80,7 @@ src/
 │   ├── CurrencyExchange.tsx
 │   ├── CurrencyList.tsx
 │   ├── CurrencySelector.tsx
+│   ├── DisconnectedScreen.tsx
 │   ├── ErrorScreen.tsx
 │   ├── HiddenCurrenciesToggle.tsx
 │   ├── LoadingScreen.tsx
