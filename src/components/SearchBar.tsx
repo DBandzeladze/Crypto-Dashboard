@@ -11,7 +11,7 @@ export function SearchBar({ searchTerm, onSearchChange }: SearchBarProps) {
     onSearchChange(event.target.value);
   };
   return (
-    <form className="flex items-center max-w-sm space-x-2">
+    <form className="flex items-center max-w-md space-x-2">
       <label htmlFor="search" className="sr-only">
         Search
       </label>

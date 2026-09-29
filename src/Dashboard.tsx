@@ -118,13 +118,14 @@ function Dashboard() {
       visibleMarketData,
       activeView,
     );
+    const selectedHiddenData = selectByActiveView(hiddenMarketData, activeView);
     const filteredMarketData = filterMarketData(selectedMarketData);
     const sortedMarketData = sortMarketData(
       filteredMarketData,
       sortOption,
       sortDirection,
     );
-    return { sortedMarketData, hiddenMarketData };
+    return { sortedMarketData, selectedHiddenData };
   }
   function onSortChange(selection: {
     option: SortOption;
@@ -152,7 +153,7 @@ function Dashboard() {
     localStorage.setItem("hidden", JSON.stringify(hiddenMap));
   }, [hiddenMap]);
 
-  const { sortedMarketData, hiddenMarketData } = processMarketData();
+  const { sortedMarketData, selectedHiddenData } = processMarketData();
 
   useEffect(() => {
     if (priceAlert === undefined) return;
@@ -208,52 +209,79 @@ function Dashboard() {
   }, [priceAlert]);
   return (
     <div className="min-h-screen bg-gray-100">
-      <header className="flex flex-row-reverse">
-        <span className="mt-2 mr-6">
+      <div className="mx-auto w-full max-w-8xl px-4 py-6">
+        <header className="mb-6 flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-semibold text-gray-900">
+              Crypto Dashboard
+            </h1>
+            <p className="mt-1 text-sm text-gray-500">
+              Live cryptocurrency market data
+            </p>
+          </div>
+
           <ConnectionStatusIndicator connectionStatus={connectionStatus} />
-        </span>
-      </header>
-      <div className="ml-4 flex flex-row gap-2">
-        <MarketViewToggle
-          onMarketViewChange={setActiveView}
-          activeView={activeView}
-        />
-        <SearchBar searchTerm={searchTerm} onSearchChange={setSearchTerm} />
-        <div className="">
-          <SortingMenu onSortChange={onSortChange} />
-        </div>
-      </div>
-      <CurrencyList
-        marketData={sortedMarketData}
-        onFavoriteChange={onFavoriteChange}
-        favoriteMap={favoriteMap}
-        onHiddenChange={onHiddenChange}
-        hiddenMap={hiddenMap}
-      />
-      {hiddenMarketData.length ? (
-        <div className="ml-4">
-          <HiddenCurrenciesToggle
-            isOpen={showHidden}
-            onOpenchange={setShowHidden}
-            HiddenCount={hiddenMarketData.length}
+        </header>
+        <section>
+          <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center">
+            <MarketViewToggle
+              onMarketViewChange={setActiveView}
+              activeView={activeView}
+            />
+            <div className="flex flex-row gap-3">
+              <div className="w-full sm:max-w-md">
+                <SearchBar
+                  searchTerm={searchTerm}
+                  onSearchChange={setSearchTerm}
+                />
+              </div>
+              <SortingMenu onSortChange={onSortChange} />
+            </div>
+          </div>
+        </section>
+        <section className="mt-6">
+          <CurrencyList
+            marketData={sortedMarketData}
+            onFavoriteChange={onFavoriteChange}
+            favoriteMap={favoriteMap}
+            onHiddenChange={onHiddenChange}
+            hiddenMap={hiddenMap}
           />
-        </div>
-      ) : (
-        <></>
-      )}
-      {showHidden ? (
-        <CurrencyList
-          marketData={hiddenMarketData}
-          onFavoriteChange={onFavoriteChange}
-          favoriteMap={favoriteMap}
-          onHiddenChange={onHiddenChange}
-          hiddenMap={hiddenMap}
-        />
-      ) : (
-        <></>
-      )}
-      <div className="ml-4">
-        <CurrencyExchange marketData={marketData} />
+        </section>
+
+        <section className="mt-8">
+          {selectedHiddenData.length > 0 && (
+            <div className="mt-4">
+              <HiddenCurrenciesToggle
+                isOpen={showHidden}
+                onOpenchange={setShowHidden}
+                HiddenCount={selectedHiddenData.length}
+              />
+            </div>
+          )}
+          {showHidden && (
+            <CurrencyList
+              marketData={selectedHiddenData}
+              onFavoriteChange={onFavoriteChange}
+              favoriteMap={favoriteMap}
+              onHiddenChange={onHiddenChange}
+              hiddenMap={hiddenMap}
+            />
+          )}
+        </section>
+
+        <section className="mt-10">
+          <div className="mb-4">
+            <h2 className="text-xl font-semibold text-indigo-950">
+              Currency Converter
+            </h2>
+            <p className="text-sm text-gray-500">
+              Convert between supported cryptocurrencies using live prices.
+            </p>
+          </div>
+
+          <CurrencyExchange marketData={marketData} />
+        </section>
       </div>
     </div>
   );

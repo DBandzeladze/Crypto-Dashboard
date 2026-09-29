@@ -43,10 +43,7 @@ export function CurrencyExchange({ marketData }: CurrencyExchangeProps) {
   }
 
   return (
-    <div className="flex flex-col gap-4 w-full max-w-sm">
-      <h2 className="ml-2 text-lg font-semibold">
-        Calculate Currency Conversion
-      </h2>
+    <div className="flex flex-col gap-4 w-full max-w-sm border border-indigo-200 rounded-md p-4 bg-white">
       <div className="">
         <CurrencySelector
           selectedItem={sourceCurrency}

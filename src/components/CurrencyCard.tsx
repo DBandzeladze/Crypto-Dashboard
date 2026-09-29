@@ -35,40 +35,45 @@ export function CurrencyCard({
             <Icon className="h-6 w-6 text-indigo-900" icon={currencyIcon} />
           </span>
           <div className="flex flex-col leading-tight">
-            <span className="text-sm font-semibold text-indigo-950">
-              {symbol}
+            <span className="text-md font-semibold text-indigo-950">
+              {name}
             </span>
-            <span className="text-xs text-indigo-400">{name}</span>
+            <span className="text-xs text-indigo-400">{symbol}</span>
           </div>
         </div>
 
-        <span className="relative group">
-          <button
-            onClick={handleFavoriteChange}
-            className="cursor-pointer flex h-11 w-11 items-center justify-center rounded-full text-indigo-400"
-          >
-            <Icon
-              icon={isFavorite ? "carbon:favorite-filled" : "carbon:favorite"}
-              className="size-6"
-            />
-          </button>
-          <div className="absolute right-full top-1/2 -translate-y-1/2 mr-1 hidden group-hover:block px-2 py-1 bg-gray-800 text-white text-xs rounded shadow-lg whitespace-nowrap">
-            {isFavorite ? "Remove from favorites" : "Mark as favorite"}
-            <div className="absolute left-full top-1/2 -translate-y-1/2 border-4 border-transparent border-l-gray-800"></div>
-          </div>
-        </span>
-        <span className="relative group">
-          <button
-            onClick={handleHiddenChange}
-            className="cursor-pointer flex h-11 w-11 items-center justify-center rounded-full text-indigo-400 group"
-          >
-            <Icon icon={isHidden ? "ep:view" : "ep:hide"} className="size-6" />
-          </button>
-          <div className="absolute right-full top-1/2 -translate-y-1/2 mr-1 hidden group-hover:block px-2 py-1 bg-gray-800 text-white text-xs rounded shadow-lg whitespace-nowrap">
-            {isHidden ? "Show currnecy" : "Hide currency"}
-            <div className="absolute left-full top-1/2 -translate-y-1/2 border-4 border-transparent border-l-gray-800"></div>
-          </div>
-        </span>
+        <div className="flex items-center gap-1">
+          <span className="relative group">
+            <button
+              onClick={handleFavoriteChange}
+              className="aria-label cursor-pointer flex h-9 w-9 items-center justify-center rounded-full text-indigo-400"
+            >
+              <Icon
+                icon={isFavorite ? "carbon:favorite-filled" : "carbon:favorite"}
+                className="size-6"
+              />
+            </button>
+            <div className="absolute right-full top-1/2 -translate-y-1/2 mr-1 hidden group-hover:block px-2 py-1 bg-gray-800 text-white text-xs rounded shadow-lg whitespace-nowrap">
+              {isFavorite ? "Remove from favorites" : "Mark as favorite"}
+              <div className="absolute left-full top-1/2 -translate-y-1/2 border-4 border-transparent border-l-gray-800"></div>
+            </div>
+          </span>
+          <span className="relative group">
+            <button
+              onClick={handleHiddenChange}
+              className="aria-label cursor-pointer flex h-9 w-9 items-center justify-center rounded-full text-indigo-400 group"
+            >
+              <Icon
+                icon={isHidden ? "ep:view" : "ep:hide"}
+                className="size-6"
+              />
+            </button>
+            <div className="absolute left-full top-1/2 -translate-y-1/2 mr-1 hidden group-hover:block px-2 py-1 bg-gray-800 text-white text-xs rounded shadow-lg whitespace-nowrap">
+              {isHidden ? "Show currency" : "Hide currency"}
+              <div className="absolute right-full top-1/2 -translate-y-1/2 border-4 border-transparent border-r-gray-800"></div>
+            </div>
+          </span>
+        </div>
       </div>
 
       <div className="flex flex-row justify-between items-center">

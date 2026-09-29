@@ -14,7 +14,7 @@ export function MarketViewToggle({
   }
 
   return (
-    <div className="flex flex-row gap-3 rounded-md border border-indigo-100 bg-white px-2 py-1.5">
+    <div className="flex flex-row gap-3 max-w-[150px] rounded-md border border-indigo-100 bg-white p-1">
       <div className="flex items-center justify-between">
         <button
           onClick={() => handleViewChange("all")}
