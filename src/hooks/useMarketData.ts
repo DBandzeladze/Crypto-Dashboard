@@ -22,7 +22,7 @@ export function useMarketData() {
   const [connectionStatus, setConnectionStatus] =
     useState<ConnectionStatus>("connecting");
   const [priceAlert, setPriceAlert] = useState<PriceAlert>();
-  const [threshold, setThreshold] = useState(2);
+  const threshold = 2;
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const shouldReconnectRef = useRef(true);
