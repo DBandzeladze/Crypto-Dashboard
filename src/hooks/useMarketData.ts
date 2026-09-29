@@ -99,13 +99,10 @@ export function useMarketData() {
       setConnectionStatus("error");
     };
     wsRef.current.onmessage = (event) => {
-      // console.log("Message received:", event.data);
       const data: BinanceTickerMessage = JSON.parse(event.data);
       if (data && data.data) {
-        // console.log("Received data:", data);
         const { s: symbol, c: rawCurrentPrice } = data.data;
         const currentPrice = parseFloat(rawCurrentPrice);
-        // console.log(`Symbol: ${symbol}, Current Price: ${currentPrice}`);
         if (isSupportedSymbol(symbol)) {
           const name = currencyInfo[symbol].name;
           if (initialPricesRef.current[symbol] === undefined) {
@@ -123,7 +120,6 @@ export function useMarketData() {
             const existingCurrency = prevData.find(
               (currency) => currency.symbol === symbol,
             );
-            // console.log("Existing currency:", existingCurrency);
             if (existingCurrency) {
               const previousPrice = existingCurrency.currentPrice;
               const priceDirection =

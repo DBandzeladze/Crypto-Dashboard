@@ -13,10 +13,10 @@ import { SortingMenu } from "./components/SortingMenu";
 import { MarketViewToggle } from "./components/MarketViewToggle";
 import { HiddenCurrenciesToggle } from "./components/HiddenCurrenciesToggle";
 import { toast } from "@/components/ui/toast";
+import { CurrencyExchange } from "./components/CurrencyExchange";
 
 function Dashboard() {
   const { marketData, connectionStatus, priceAlert } = useMarketData();
-  console.log(priceAlert);
   const [searchTerm, setSearchTerm] = useState("");
   const [sortOption, setSortOption] = useState<SortOption>("name");
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
@@ -252,6 +252,9 @@ function Dashboard() {
       ) : (
         <></>
       )}
+      <div className="ml-4">
+        <CurrencyExchange marketData={marketData} />
+      </div>
     </div>
   );
 }
