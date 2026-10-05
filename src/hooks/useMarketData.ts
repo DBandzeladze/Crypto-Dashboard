@@ -19,12 +19,10 @@ const currencyInfo: Record<SupportedSymbol, { name: string }> = {
 
 type props = {
   threshold: number;
-  haveThresholdchange: React.Dispatch<React.SetStateAction<number>>;
   favoriteMap: Record<string, boolean>;
 };
 export function useMarketData({
   threshold,
-  haveThresholdchange,
   favoriteMap,
 }: props) {
   console.log(threshold, "entered");

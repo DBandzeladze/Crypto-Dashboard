@@ -41,7 +41,6 @@ function Dashboard() {
   );
   const { marketData, connectionStatus, priceAlert } = useMarketData({
     threshold: theshold,
-    haveThresholdchange: setThreshold,
     favoriteMap: favoriteMap,
   });
   const [hiddenMap, setHiddenMap] = useState<Record<string, boolean>>(() => {
@@ -231,8 +230,8 @@ function Dashboard() {
           <ConnectionStatusIndicator connectionStatus={connectionStatus} />
         </header>
         <input
-          className="border border-indigo-200 bg-white rounded mb-4"
-          placeholder="Enter alert threshold"
+          className="border border-indigo-200 bg-white rounded mb-4 p-2"
+          placeholder="Set alert threshold for favorites"
           onChange={(event) => setThreshold(Number(event.target.value))}
         ></input>
         {(connectionStatus === "connecting" ||
