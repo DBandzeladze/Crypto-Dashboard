@@ -17,12 +17,21 @@ const currencyInfo: Record<SupportedSymbol, { name: string }> = {
   XRPUSDT: { name: "XRP" },
 };
 
-export function useMarketData() {
+type props = {
+  threshold: number;
+  haveThresholdchange: React.Dispatch<React.SetStateAction<number>>;
+  favoriteMap: Record<string, boolean>;
+};
+export function useMarketData({
+  threshold,
+  haveThresholdchange,
+  favoriteMap,
+}: props) {
+  console.log(threshold, "entered");
   const [marketData, setMarketData] = useState<MarketCurrency[]>([]);
   const [connectionStatus, setConnectionStatus] =
     useState<ConnectionStatus>("connecting");
   const [priceAlert, setPriceAlert] = useState<PriceAlert>();
-  const threshold = 2;
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const shouldReconnectRef = useRef(true);
@@ -35,10 +44,12 @@ export function useMarketData() {
     name: string,
     initialPrice: number,
     currentPrice: number,
+    threshold: number,
   ) {
     const { upper, lower } = thresholdFlagsRef.current[symbol];
     const percentageChange =
       ((currentPrice - initialPrice) / initialPrice) * 100;
+    console.log(threshold, "inside function");
     if (Math.abs(percentageChange) < threshold) {
       thresholdFlagsRef.current[symbol] = { upper: false, lower: false };
     } else {
@@ -113,12 +124,16 @@ export function useMarketData() {
                 lower: false,
               };
             } else {
-              handlePriceAlert(
-                symbol,
-                name,
-                initialPricesRef.current[symbol],
-                currentPrice,
-              );
+              (console.log(threshold), "before hande");
+              if (favoriteMap[symbol]) {
+                handlePriceAlert(
+                  symbol,
+                  name,
+                  initialPricesRef.current[symbol],
+                  currentPrice,
+                  threshold,
+                );
+              }
             }
             setMarketData((prevData) => {
               const existingCurrency = prevData.find(
@@ -165,8 +180,9 @@ export function useMarketData() {
     };
   }
   useEffect(() => {
+    console.log(threshold, "inside useEffect");
     connect();
-
+    favoriteMap;
     return () => {
       shouldReconnectRef.current = false;
       if (wsRef.current) {
@@ -177,7 +193,7 @@ export function useMarketData() {
         reconnectTimerRef.current = null;
       }
     };
-  }, []);
+  }, [threshold, favoriteMap]);
   return {
     marketData,
     connectionStatus,

@@ -19,7 +19,7 @@ import { ErrorScreen } from "./components/ErrorScreen";
 import { DisconnectedScreen } from "./components/DisconnectedScreen";
 
 function Dashboard() {
-  const { marketData, connectionStatus, priceAlert } = useMarketData();
+  const [theshold, setThreshold] = useState(2);
   const [searchTerm, setSearchTerm] = useState("");
   const [sortOption, setSortOption] = useState<SortOption>("name");
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
@@ -39,6 +39,11 @@ function Dashboard() {
       }
     },
   );
+  const { marketData, connectionStatus, priceAlert } = useMarketData({
+    threshold: theshold,
+    haveThresholdchange: setThreshold,
+    favoriteMap: favoriteMap,
+  });
   const [hiddenMap, setHiddenMap] = useState<Record<string, boolean>>(() => {
     const savedHidden = localStorage.getItem("hidden");
     if (savedHidden) {
@@ -225,6 +230,11 @@ function Dashboard() {
 
           <ConnectionStatusIndicator connectionStatus={connectionStatus} />
         </header>
+        <input
+          className="border border-indigo-200 bg-white rounded mb-4"
+          placeholder="Enter alert threshold"
+          onChange={(event) => setThreshold(Number(event.target.value))}
+        ></input>
         {(connectionStatus === "connecting" ||
           connectionStatus === "reconnecting") &&
         marketData.length === 0 ? (
